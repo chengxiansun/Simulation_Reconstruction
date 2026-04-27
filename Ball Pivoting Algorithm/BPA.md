@@ -1,0 +1,2 @@
+原始论文：https://www.researchgate.net/publication/23477733_The_Ball_Pivoting_Algorithm_for_Surface_Reconstruction  
+Open3D 实现：https://www.open3d.org/docs/latest/tutorial/Advanced/surface_reconstruction.html#Ball-Pivoting
