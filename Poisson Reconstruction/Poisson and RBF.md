@@ -1,14 +1,13 @@
-# 径向基函数 RBF 隐式曲面拟合 完整原理 + 数学推导 + 极简白话解释 + 核心思路
-我给你讲得**既通俗又带严谨数学**，和泊松重建做对比，你一下就懂。
+# 径向基函数 RBF 隐式曲面拟合 完整原理 + 数学推导
 
 ---
 
 # 一、RBF 隐式拟合 核心思想
 ## 一句话总结
-给一堆**无序点云（不需要法向量）**，构造一个**隐式函数 \(f(\boldsymbol{x})\)**：
-\[
-f(\boldsymbol{x}) = 0 \quad \Rightarrow \text{物体表面}
-\]
+给一堆**无序点云（不需要法向量）**，构造一个**隐式函数 $f(\mathbf{x})$**：
+$$
+f(\mathbf{x}) = 0 \quad \Rightarrow \text{物体表面}
+$$  
 RBF 就是用**径向基函数**把这个隐式场插值拟合出来。
 
 特点：
@@ -22,57 +21,53 @@ RBF 就是用**径向基函数**把这个隐式场插值拟合出来。
 # 二、数学原理（一步步拆解）
 
 ## 1. 隐式曲面定义
-设空间任意点 \(\boldsymbol{x}=(x,y,z)\)
+设空间任意点 $\mathbf{x}=(x,y,z)$
 构造标量函数：
-\[
-f(\boldsymbol{x}) = 0
-\]
-- \(f(\boldsymbol{x})>0\)：模型内部
-- \(f(\boldsymbol{x})<0\)：模型外部
-- \(f(\boldsymbol{x})=0\)：**物体表面**
+$$
+f(\mathbf{x}) = 0
+$$
+- $f(\mathbf{x})>0$：模型内部
+- $f(\mathbf{x})<0$：模型外部
+- $f(\mathbf{x})=0$：**物体表面**
 
 ## 2. RBF 函数形式
 径向基函数只跟**距离**有关：
-\[
-\phi(\|\boldsymbol{x}-\boldsymbol{x}_i\|)
-\]
+$$
+\phi(\|\mathbf{x}-\mathbf{x}_i\|)
+$$
 常见 RBF：
-- 高斯：\(\phi(r)=e^{-(\varepsilon r)^2}\)
-- 多重二次：\(\phi(r)=\sqrt{1+(\varepsilon r)^2}\)
-- 薄板样条：\(\phi(r)=r^2\log r\)
+- 高斯：$\phi(r)=e^{-(\varepsilon r)^2}$
+- 多重二次：$\phi(r)=\sqrt{1+(\varepsilon r)^2}$
+- 薄板样条：$\phi(r)=r^2\log r$
 
 ## 3. 拟合模型
-把隐式函数写成所有控制点 RBF 的线性组合：
-\[
-f(\boldsymbol{x})
-= \sum_{i=1}^n w_i \,\phi(\|\boldsymbol{x}-\boldsymbol{x}_i\|)
-+ a_0 + a_1 x + a_2 y + a_3 z
-\]
-- \(w_i\)：待求权重
+把隐式函数写成所有控制点 RBF 的线性组合：  
+$$
+f(\mathbf{x}) = \sum_{i=1}^n w_i \,\phi(\|\mathbf{x}-\mathbf{x}_i\|)+ a_0 + a_1 x + a_2 y + a_3 z  
+$$  
+- $w_i$：待求权重
 - 后面线性项：保证**线性多项式再生**，拟合更稳
 
 ## 4. 约束条件（关键）
-给定表面点 \(\boldsymbol{x}_i\)，强制：
-\[
-f(\boldsymbol{x}_i) = 0,\quad i=1\dots n
-\]
+给定表面点 $\mathbf{x}_i$，强制：
+$$
+f(\mathbf{x}_i) = 0,\quad i=1\dots n
+$$
 
 为了区分内外，还要**额外构造外点/内点**（偏移一点点）：
-\[
-f(\boldsymbol{x}_i+\epsilon\boldsymbol{n}_i) = +1,\quad
-f(\boldsymbol{x}_i-\epsilon\boldsymbol{n}_i) = -1
-\]
+$$
+f(\mathbf{x}_i+\epsilon\mathbf{n}_i) = +1,\quad
+f(\mathbf{x}_i-\epsilon\mathbf{n}_i) = -1
+$$
 > 就算**没有法向量**，也可以随机偏移生成内外标记，照样能拟合。
 
 ## 5. 求解线性方程组
 把上面约束写成：
-\[
-\boldsymbol{A}\boldsymbol{W} = \boldsymbol{B}
-\]
-解出权重 \(w_i\)，就得到完整隐式场。
+$\mathbf{A}\mathbf{W} = \mathbf{B}$
+解出权重 $w_i$，就得到完整隐式场。
 
 ## 6. 提取曲面
-用 **Marching Cubes** 提取 \(f(\boldsymbol{x})=0\) 等值面，得到三角网格。
+用 **Marching Cubes** 提取 $f(\mathbf{x})=0$ 等值面，得到三角网格。
 
 ---
 
@@ -81,7 +76,7 @@ f(\boldsymbol{x}_i-\epsilon\boldsymbol{n}_i) = -1
 2. 对每个点，**沿微小方向偏移生成内点、外点**（不需要法向也能做）
 3. 构建 RBF 插值线性方程组
 4. 解稀疏矩阵，得到 RBF 权重
-5. 空间网格化，逐点计算 \(f(x,y,z)\)
+5. 空间网格化，逐点计算 $f(x,y,z)$
 6. Marching Cubes 提取 0 等值面 → 重建网格
 
 ---
@@ -89,7 +84,7 @@ f(\boldsymbol{x}_i-\epsilon\boldsymbol{n}_i) = -1
 # 四、RBF隐式拟合 vs 泊松重建 核心区别
 | 项目 | RBF 隐式拟合 | 泊松/筛选泊松重建 |
 |------|-------------|------------------|
-| 数学基础 | 径向基插值（代数拟合） | 解泊松偏微分方程 \(\Delta f=\text{div}\mathbf n\) |
+| 数学基础 | 径向基插值（代数拟合） | 解泊松偏微分方程 $\Delta f=\text{div}\mathbf n$ |
 | 是否要法向量 | **可以不要** | **必须要**（必须估法线） |
 | 支撑域 | 全局支撑，矩阵稠密 | 八叉树+B样条，稀疏局部支撑 |
 | 大规模点云 | 慢，矩阵太大 | 极快，线性复杂度 O(N) |
